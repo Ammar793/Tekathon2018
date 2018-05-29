@@ -1,6 +1,6 @@
-"# Tekathon2018" 
+# Tekathon2018
 
-##Setup
+## Setup
 
 1. run the command "pip install -r requirements.txt" to install required dependencies
 

@@ -2,6 +2,8 @@
 
 ## Setup
 
+To run the program you will need to have python 3.6* installed https://wiki.python.org/moin/BeginnersGuide/Download
+
 1. run the command "pip install -r requirements.txt" to install required dependencies
 
 2. For Teserract OCR, download Tesseract OCR executables from https://github.com/UB-Mannheim/tesseract/wiki

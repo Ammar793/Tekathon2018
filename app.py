@@ -1,13 +1,11 @@
 from PyQt5 import QtCore, QtWidgets, uic, QtGui
 import sys
 import cv2
-import numpy as np
 import threading
-import time
 from queue import *
 from PIL import Image
-import pytesseract
-import os
+import snack_detection
+import employee_detection
 
 running = False
 capture_thread = None
@@ -15,6 +13,10 @@ form_class = uic.loadUiType("ui/simple.ui")[0]
 q = Queue()
 
 
+#main app
+
+
+# QT widget for showing image
 class OwnImageWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(OwnImageWidget, self).__init__(parent)
@@ -34,6 +36,8 @@ class OwnImageWidget(QtWidgets.QWidget):
         qp.end()
 
 
+
+# QT widget for main window
 class MyWindowClass(QtWidgets.QMainWindow, form_class):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -54,6 +58,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         running = True
         capture_thread.start()
         ocrThread.start()
+        snackDetectionThread.start()
         self.startButton.setEnabled(False)
         self.startButton.setText('Starting...')
 
@@ -91,7 +96,9 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             #filename = "{}.png".format(os.getpid())
             #cv2.imwrite(filename, gray)
             global imageToText
-            imageToText = Image.fromarray(img)
+
+            snack_detection.snack_image = img
+            employee_detection.image_to_text = Image.fromarray(img)
 
             #print(text)
             #with PyTessBaseAPI() as api:
@@ -111,15 +118,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         running = False
 
 
-def ocr_worker():
-    while True:
-        global imageToText
-        print (imageToText)
-        if(imageToText != 0):
-            text = pytesseract.image_to_string(imageToText)
-            print("text")
-            print(text)
-
+# thread worker for getting image from webcam
 def grab(cam, queue, width, height, fps):
     global running
     capture = cv2.VideoCapture(cam)
@@ -138,10 +137,15 @@ def grab(cam, queue, width, height, fps):
         else:
             print(queue.qsize())
 
-imageToText = 0
-capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
-ocrThread = threading.Thread(target=ocr_worker)
 
+
+#setting up threads
+capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
+ocrThread = threading.Thread(target= employee_detection.ocr_worker)
+snackDetectionThread = threading.Thread(target= snack_detection.snack_detection_worker)
+
+
+#starting app
 app = QtWidgets.QApplication(sys.argv)
 w = MyWindowClass(None)
 w.setWindowTitle('Lean Clean Canteen')

@@ -10,7 +10,7 @@ To run the program you will need to have python 3.6* installed https://wiki.pyth
 
 3. For Teserract OCR, download Tesseract OCR executables from https://github.com/UB-Mannheim/tesseract/wiki
 
-4. Add the tesseract directory to your PATH. It is most likely present in 'C:/Program Files (x86)/Tesseract-OCR/tesseract'
+4. Add the tesseract directory to your PATH. It is most likely present in 'C:\Program Files (x86)\Tesseract-OCR/tesseract'
 
 5. Set the environment variable TESSDATA_PREFIX to the location where folder 'tessdata' is present. Most probably TESSDATA_PREFIX=C:\Program Files (x86)\Tesseract-OCR.
 

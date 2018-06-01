@@ -9,7 +9,7 @@ import csv
 from glob import glob
 import cv2
 import time
-
+import tensorflow as tf
 import tflearn
 from tflearn.data_utils import shuffle, to_categorical
 from tflearn.layers.core import input_data, dropout, fully_connected
@@ -23,8 +23,10 @@ from tflearn.metrics import Accuracy
 ### Import picture files 
 ###################################
 
+file_name = 'Y_Train.csv'
+folder_with_images = "./train/train/"
 row_count=0
-with open('Y_Train.csv', 'r') as csvfile:
+with open(file_name , 'r') as csvfile:
 	spamreader = csv.reader(csvfile)
 	row_count = sum(1 for row in spamreader)
 	
@@ -42,14 +44,14 @@ def readImages(n_files, size_image):
 	
 	first = True
 
-	with open('Y_Train.csv', 'r') as csvfile:
+	with open(file_name, 'r') as csvfile:
 		spamreader = csv.reader(csvfile)
 		for row in spamreader:
 			if first:
 				first = False
 				continue
-			if(os.path.isfile("./train/train/" + row[0]) ):
-				img = cv2.imread ("./train/train//" + row[0])
+			if(os.path.isfile(folder_with_images + row[0]) ):
+				img = cv2.imread (folder_with_images + row[0])
 				new_img = imresize(img, (size_image, size_image, 3))				
 				images[int(row[1])].append (new_img)
 	#print (images)
@@ -60,13 +62,13 @@ def readImages(n_files, size_image):
 #Create classifiers and train
 
 imageSet = readImages(n_files, size_image)
-cats= imageSet[0]
-dogs = imageSet[1]
+chips= imageSet[0]
+drinks = imageSet[1]
 
-allX = cats.copy()
-allX.extend(dogs)
+allX = chips.copy()
+allX.extend(drinks)
 
-ally = [0] * len(cats) + [1] *len(dogs)
+ally = [0] * len(chips) + [1] *len(drinks)
 
 allX = np.array(allX,dtype=np.uint8)
 ally = np.array(ally,dtype=np.uint8)
@@ -171,7 +173,7 @@ tf.summary.FileWriter
 					 
 
 # Wrap the network in a model object
-model = tflearn.DNN(network, checkpoint_path='model_cat_dog_9.tflearn', max_checkpoints = 3,
+model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_9.tflearn', max_checkpoints = 3,
                     tensorboard_verbose = 3, tensorboard_dir='tmp/tflearn_logs/')
 
 ###################################
@@ -183,6 +185,6 @@ Y = Y.astype('float32')
 X_test = X_test.astype('float32')
 Y_test = Y_test.astype('float32')
 model.fit(X, Y, validation_set=(X_test, Y_test), batch_size=500,
-      n_epoch=100, run_id='model_cat_dog_6', show_metric=True)
+      n_epoch=100, run_id='model_chips_drinks_6', show_metric=True)
 
-model.save('model_cat_dog_6_final.tflearn')
+model.save('model_chips_drinks_6_final.tflearn')

@@ -58,7 +58,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         running = True
         capture_thread.start()
         ocrThread.start()
-        snackDetectionThread.start()
+        #snackDetectionThread.start()
         self.startButton.setEnabled(False)
         self.startButton.setText('Starting...')
 
@@ -79,7 +79,16 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
             img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
+            gray = cv2.threshold(gray, 100, 255,
+                                 cv2.THRESH_BINARY)[1]
+
+            #gray = cv2.medianBlur(gray,3)
+            #cv2.imshow("grey",gray)
+
+            #cv2.waitKey(0)
+            #cv2.destroyAllWindows()
            # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
            # gray = np.float32(gray)
@@ -98,7 +107,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             global imageToText
 
             snack_detection.snack_image = img
-            employee_detection.image_to_text = Image.fromarray(img)
+            employee_detection.image_to_text = Image.fromarray(gray)
 
             #print(text)
             #with PyTessBaseAPI() as api:
@@ -112,6 +121,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             bpl = bpc * width
             image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888 )
             self.ImgWidget.setImage(image)
+            self.label_2.setText(employee_detection.text)
 
     def closeEvent(self, event):
         global running

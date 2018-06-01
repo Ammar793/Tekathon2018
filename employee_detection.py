@@ -7,6 +7,20 @@ import re
 text = "nothing"
 image_to_text = 0
 employee_names = data_storage.employee_names
+employee_found = False
+
+def set_employee_found(boolean):
+    global employee_found
+    employee_found = True
+
+def set_image_to_text(image_array):
+    global image_to_text
+    image_to_text = image_array
+
+def reset():
+    set_employee_found(False)
+    set_image_to_text(0)
+
 def ocr_worker():
     global text
     global image_to_text
@@ -31,4 +45,8 @@ def check_if_two_names(text):
         matches = difflib.get_close_matches(proper_name, employee_names)
         if( len(matches) >0):
             proper_name = matches[0]
+            successfully_found()
     return proper_name
+
+def successfully_found():
+    set_employee_found(True)

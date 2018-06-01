@@ -79,10 +79,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
             img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-            gray = cv2.threshold(gray, 100, 255,
-                                 cv2.THRESH_BINARY)[1]
 
             #gray = cv2.medianBlur(gray,3)
             #cv2.imshow("grey",gray)
@@ -107,7 +104,6 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             global imageToText
 
             snack_detection.snack_image = img
-            employee_detection.image_to_text = Image.fromarray(gray)
 
             #print(text)
             #with PyTessBaseAPI() as api:
@@ -116,9 +112,25 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
                # print(api.AllWordConfidences())
 
 
+            crop_x_start = 250
+            crop_x_end = 400
+            crop_y_start = 100
+            crop_y_end = 300
+
             #height, width  = edges.shape
             height, width, bpc = img.shape
             bpl = bpc * width
+            img_cropped = cv2.rectangle(img, (crop_x_start, crop_y_start), (crop_x_end, crop_y_end), (255,0,0), 1)
+            gray = img[crop_y_start:crop_y_end, crop_x_start:crop_x_end]
+            gray = cv2.cvtColor(gray, cv2.COLOR_RGB2GRAY)
+
+            gray = cv2.threshold(gray, 100, 255,
+                                 cv2.THRESH_TOZERO)[1]
+
+           # cv2.imshow("grey", gray)
+            #cv2.waitKey(0)
+            #cv2.destroyAllWindows()
+            employee_detection.image_to_text = Image.fromarray(gray)
             image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888 )
             self.ImgWidget.setImage(image)
             self.label_2.setText(employee_detection.text)
@@ -146,7 +158,6 @@ def grab(cam, queue, width, height, fps):
             queue.put(frame)
         else:
             print(queue.qsize())
-
 
 
 #setting up threads

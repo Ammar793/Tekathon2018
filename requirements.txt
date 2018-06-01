@@ -3,3 +3,4 @@ pillow
 pytesseract
 pyqt5
 tensorflow
+tflearn

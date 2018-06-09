@@ -2,7 +2,6 @@
 
 ## In order to train the Neural Network follow the instructions below:
 
-
 1. get all the picture files from each category in the same folder
 
 2. make a csv file that lists all the image names in one column followed by 0 or 1 in the second column, where 0 means chips and 1 means soft drink. e.g

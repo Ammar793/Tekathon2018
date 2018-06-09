@@ -11,7 +11,7 @@ employee_found = False
 
 def set_employee_found(boolean):
     global employee_found
-    employee_found = True
+    employee_found = boolean
 
 def set_image_to_text(image_array):
     global image_to_text
@@ -21,10 +21,14 @@ def reset():
     set_employee_found(False)
     set_image_to_text(0)
 
+def successfully_found():
+    set_employee_found(True)
+
 def ocr_worker():
+    global employee_found
     global text
     global image_to_text
-    while True:
+    while not employee_found:
         print (image_to_text)
         if(image_to_text != 0):
             text = pytesseract.image_to_string(image_to_text)
@@ -48,5 +52,3 @@ def check_if_two_names(text):
             successfully_found()
     return proper_name
 
-def successfully_found():
-    set_employee_found(True)

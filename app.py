@@ -6,15 +6,30 @@ from queue import *
 from PIL import Image
 import snack_detection
 import employee_detection
+import image_processing
 
 running = False
 capture_thread = None
 form_class = uic.loadUiType("ui/simple.ui")[0]
 q = Queue()
 
-
 #main app
 
+def start_all_threads():
+    capture_thread.start()
+    ocr_thread.start()
+    snack_detection_thread.start()
+
+def stop_all_threads():
+    capture_thread.stop()
+    ocr_thread.stop()
+    snack_detection_thread.stop()
+
+def start_thread(thread):
+    thread.start()
+
+def stop_thread(thread):
+    thread.stop()
 
 # QT widget for showing image
 class OwnImageWidget(QtWidgets.QWidget):
@@ -35,8 +50,6 @@ class OwnImageWidget(QtWidgets.QWidget):
             qp.drawImage(QtCore.QPoint(0, 0), self.image)
         qp.end()
 
-
-
 # QT widget for main window
 class MyWindowClass(QtWidgets.QMainWindow, form_class):
     def __init__(self, parent=None):
@@ -44,6 +57,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.setupUi(self)
 
         self.startButton.clicked.connect(self.start_clicked)
+        self.startDetectionButton.clicked.connect(self.start_detection_clicked)
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
@@ -56,84 +70,53 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
     def start_clicked(self):
         global running
         running = True
-        capture_thread.start()
-        ocrThread.start()
-        #snackDetectionThread.start()
+        start_thread(capture_thread)
+        start_thread(ocr_thread)
         self.startButton.setEnabled(False)
         self.startButton.setText('Starting...')
 
+    def start_detection_clicked(self):
+        start_thread(ocr_thread)
+        self.startDetectionButton.setEnabled(False)
 
     def update_frame(self):
+        global imageToText
         if not q.empty():
+
             self.startButton.setText('Camera is live')
             frame = q.get()
             img = frame["img"]
-
-            img_height, img_width, img_colors = img.shape
-            scale_w = float(self.window_width) / float(img_width)
-            scale_h = float(self.window_height) / float(img_height)
-            scale = min([scale_w, scale_h])
-
-            if scale == 0:
-                scale = 1
-
-            img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            self.detect_from_image(img)
 
 
-            #gray = cv2.medianBlur(gray,3)
-            #cv2.imshow("grey",gray)
+    def detect_from_image(self, img):
+        img = image_processing.pre_process_image(img, self.window_height, self.window_width)
+        snack_detection.set_snack_image(img)
 
-            #cv2.waitKey(0)
-            #cv2.destroyAllWindows()
-           # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = image_processing.process_image_for_ocr(img)
 
-           # gray = np.float32(gray)
-            #dst = cv2.cornerHarris(gray, 2, 3, 0.04)
+        height, width, bpc = img.shape
+        bpl = bpc * width
 
-           # edges = cv2.Canny(img, 100, 200)
+        employee_detection.set_image_to_text(Image.fromarray(gray))
+        image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
+        self.ImgWidget.setImage(image)
 
-            # result is dilated for marking the corners, not important
-            #dst = cv2.dilate(dst, None)
+        if (employee_detection.employee_found):
+            self.label_2.setText("Employee detected: " + employee_detection.text)
+            stop_thread(ocr_thread)
+            start_thread(snack_detection_thread)
+            employee_detection.set_employee_found(False)
 
-            # Threshold for an optimal value, it may vary depending on the image.
-            #img[dst > 0.01 * dst.max()] = [0, 0, 255]
+        elif (snack_detection.snack_found):
+            self.label_2.setText("snack detected: " + snack_detection.snack)
+            stop_thread(snack_detection_thread)
+            snack_detection.set_snack_found(False)
+            self.startDetectionButton.setEnabled(True)
 
-            #filename = "{}.png".format(os.getpid())
-            #cv2.imwrite(filename, gray)
-            global imageToText
+        else:
+            self.label_2.setText("nothing has been found!")
 
-            snack_detection.snack_image = img
-
-            #print(text)
-            #with PyTessBaseAPI() as api:
-             #   api.SetImageFile(Image.fromarray(img))
-              #  print(api.GetUTF8Text())
-               # print(api.AllWordConfidences())
-
-
-            crop_x_start = 250
-            crop_x_end = 400
-            crop_y_start = 100
-            crop_y_end = 300
-
-            #height, width  = edges.shape
-            height, width, bpc = img.shape
-            bpl = bpc * width
-            img_cropped = cv2.rectangle(img, (crop_x_start, crop_y_start), (crop_x_end, crop_y_end), (255,0,0), 1)
-            gray = img[crop_y_start:crop_y_end, crop_x_start:crop_x_end]
-            gray = cv2.cvtColor(gray, cv2.COLOR_RGB2GRAY)
-
-            gray = cv2.threshold(gray, 100, 255,
-                                 cv2.THRESH_TOZERO)[1]
-
-           # cv2.imshow("grey", gray)
-            #cv2.waitKey(0)
-            #cv2.destroyAllWindows()
-            employee_detection.image_to_text = Image.fromarray(gray)
-            image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888 )
-            self.ImgWidget.setImage(image)
-            self.label_2.setText(employee_detection.text)
 
     def closeEvent(self, event):
         global running
@@ -160,11 +143,12 @@ def grab(cam, queue, width, height, fps):
             print(queue.qsize())
 
 
+
+
 #setting up threads
 capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
-ocrThread = threading.Thread(target= employee_detection.ocr_worker)
-snackDetectionThread = threading.Thread(target= snack_detection.snack_detection_worker)
-
+ocr_thread = threading.Thread(target= employee_detection.ocr_worker)
+snack_detection_thread = threading.Thread(target= snack_detection.snack_detection_worker)
 
 #starting app
 app = QtWidgets.QApplication(sys.argv)

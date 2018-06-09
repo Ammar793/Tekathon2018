@@ -57,7 +57,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>621</width>
+      <width>291</width>
       <height>61</height>
      </rect>
     </property>
@@ -89,6 +89,19 @@
     </property>
     <property name="text">
      <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="startDetectionButton">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>10</y>
+      <width>301</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start detection</string>
     </property>
    </widget>
   </widget>

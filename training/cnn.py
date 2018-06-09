@@ -23,8 +23,8 @@ from tflearn.metrics import Accuracy
 ### Import picture files 
 ###################################
 
-file_name = 'Y_Train.csv'
-folder_with_images = "./train/train/"
+file_name = './hakathon/all.csv'
+folder_with_images = "./hakathon/all_images/"
 row_count=0
 with open(file_name , 'r') as csvfile:
 	spamreader = csv.reader(csvfile)

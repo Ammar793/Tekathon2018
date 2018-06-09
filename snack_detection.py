@@ -7,11 +7,33 @@ from tflearn.layers.conv import conv_2d, max_pool_2d
 from tflearn.layers.estimator import regression
 from tflearn.data_preprocessing import ImagePreprocessing
 from tflearn.data_augmentation import ImageAugmentation
+import segmentation
 
 
 #contains code in relation to detecting snack
 
 snack_image = np.zeros(5)
+snack_found = False
+
+def set_snack_found(boolean):
+    global snack_found
+    snack_found = boolean
+
+
+def set_snack_image(image_array):
+    global snack_image
+    snack_image = image_array
+
+
+def reset():
+    set_snack_found(False)
+    set_snack_image(np.zeros(5))
+
+
+def successfully_found():
+    set_snack_found(True)
+
+
 def snack_detection_worker():
     global snack_image
 
@@ -54,17 +76,21 @@ def snack_detection_worker():
     network = regression(network, optimizer='adam', learning_rate=1e-3, loss='categorical_crossentropy')
 
     #TODO: change checkpoint path
-    model = tflearn.DNN(network, checkpoint_path='model_cat_dog_7.tflearn', max_checkpoints=3,
+    model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_7.tflearn', max_checkpoints=3,
                         tensorboard_verbose=3, tensorboard_dir='tmp/tflearn_logs/')
 
-    model.load('reference code/model_cat_dog_6_final.tflearn')
+    model.load('training/model_chips_drinks_6_final.tflearn')
 
     while True:
         #print (image)
         image = cv2.resize(snack_image, (64, 64))
         if (image.all() != 0):
-            print ("detecting snacks")
-            test(model,  image)
+
+            if (segmentation.check_if_item_present(image)):
+                print ("detecting snacks")
+                test(model,  image)
+            else:
+                print("nothing present")
 
 
 # read images from folder
@@ -95,6 +121,7 @@ def test(model,  image):
     img = np.reshape(image, (1, 64, 64, 3))
     img = img.astype('float32')
     prob = model.predict(img)
+
     print (prob)
 
 

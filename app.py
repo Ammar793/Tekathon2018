@@ -12,6 +12,9 @@ running = False
 capture_thread = None
 form_class = uic.loadUiType("ui/simple.ui")[0]
 q = Queue()
+stop_looking_for_employee= False
+employee_text= "none"
+snack_text= "none"
 
 #main app
 
@@ -54,7 +57,11 @@ class OwnImageWidget(QtWidgets.QWidget):
 class MyWindowClass(QtWidgets.QMainWindow, form_class):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
+        self.showFullScreen()
+
+        # tell painter to use your font:
         self.setupUi(self)
+        self.set_fonts()
 
         self.startButton.clicked.connect(self.start_clicked)
         self.startDetectionButton.clicked.connect(self.start_detection_clicked)
@@ -67,13 +74,37 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
 
+
+    def set_fonts(self):
+        fontDataBase = QtGui.QFontDatabase()
+        font_id = fontDataBase.addApplicationFont("./resources/fonts/Lobster-Regular.ttf")
+        families = fontDataBase.applicationFontFamilies(font_id)
+        lobster_font = QtGui.QFont(families[0])
+
+        font_id2 = fontDataBase.addApplicationFont("./resources/fonts/AvenirLTStd-Light.otf")
+        families2 = fontDataBase.applicationFontFamilies(font_id2)
+        avenir_font = QtGui.QFont(families2[0])
+
+        self.card_title.setFont(lobster_font)
+        self.snack_title.setFont(lobster_font)
+        self.done_title.setFont(lobster_font)
+        self.main_title.setFont(lobster_font)
+
+
+        self.employe_info.setFont(avenir_font)
+        self.snack_info.setFont(avenir_font)
+        self.done_info.setFont(avenir_font)
+        self.main_info.setFont(avenir_font)
+
     def start_clicked(self):
         global running
+        global employee_text
+        global snack_text
         running = True
         start_thread(capture_thread)
-        start_thread(ocr_thread)
         self.startButton.setEnabled(False)
         self.startButton.setText('Starting...')
+        self.label_2.setText(employee_text + snack_text)
 
     def start_detection_clicked(self):
         start_thread(ocr_thread)
@@ -89,7 +120,11 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             self.detect_from_image(img)
 
 
+    def set_text(self):
+        self.label_2.setText(employee_text + snack_text)
+
     def detect_from_image(self, img):
+        global stop_looking_for_employee
         img = image_processing.pre_process_image(img, self.window_height, self.window_width)
         snack_detection.set_snack_image(img)
 
@@ -99,23 +134,28 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         bpl = bpc * width
 
         employee_detection.set_image_to_text(Image.fromarray(gray))
-        image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
+        image = QtGui.QImage( image_processing.make_rectangle(img).data, width, height, bpl, QtGui.QImage.Format_RGB888)
         self.ImgWidget.setImage(image)
 
-        if (employee_detection.employee_found):
-            self.label_2.setText("Employee detected: " + employee_detection.text)
-            stop_thread(ocr_thread)
+        if (employee_detection.employee_found and not stop_looking_for_employee):
+            global employee_text
+            employee_text = "Employee detected: " + employee_detection.text + "\n\n"
+            self.set_text()
+            #stop_thread(ocr_thread)
             start_thread(snack_detection_thread)
-            employee_detection.set_employee_found(False)
+            #employee_detection.set_employee_found(False)
+            stop_looking_for_employee = True
 
         elif (snack_detection.snack_found):
-            self.label_2.setText("snack detected: " + snack_detection.snack)
-            stop_thread(snack_detection_thread)
-            snack_detection.set_snack_found(False)
-            self.startDetectionButton.setEnabled(True)
+            global snack_text
+            snack_text =  "snack detected: " + snack_detection.snack_name
+            self.set_text()
+            #stop_thread(snack_detection_thread)
+            #snack_detection.set_snack_found(False)
+            #self.startDetectionButton.setEnabled(True)
 
-        else:
-            self.label_2.setText("nothing has been found!")
+        #else:
+        #    self.label_2.setText("nothing has been found!")
 
 
     def closeEvent(self, event):

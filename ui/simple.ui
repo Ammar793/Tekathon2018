@@ -9,24 +9,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>971</width>
-    <height>500</height>
+    <width>1601</width>
+    <height>897</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">background-color: rgb(245, 220, 180)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>42</x>
       <y>80</y>
-      <width>621</width>
-      <height>381</height>
+      <width>1000</width>
+      <height>700</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -34,6 +37,9 @@
       <horstretch>0</horstretch>
       <verstretch>0</verstretch>
      </sizepolicy>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="title">
      <string>Video</string>
@@ -46,18 +52,23 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>601</width>
-       <height>351</height>
+       <width>981</width>
+       <height>671</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-style: outset;
+border-width: 2px;
+border-color: rgb(255,255,255);</string>
      </property>
     </widget>
    </widget>
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>291</width>
+      <x>1060</x>
+      <y>480</y>
+      <width>101</width>
       <height>61</height>
      </rect>
     </property>
@@ -65,43 +76,145 @@
      <string>Start video</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="card_title">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>130</y>
-      <width>71</width>
-      <height>31</height>
+      <x>1090</x>
+      <y>60</y>
+      <width>271</width>
+      <height>41</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Badge OCR:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>740</x>
-      <y>140</y>
-      <width>191</width>
-      <height>301</height>
-     </rect>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(230, 110, 110)</string>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Scan The Card</string>
     </property>
    </widget>
    <widget class="QPushButton" name="startDetectionButton">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>10</y>
-      <width>301</width>
+      <x>1060</x>
+      <y>550</y>
+      <width>111</width>
       <height>61</height>
      </rect>
     </property>
     <property name="text">
      <string>Start detection</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="employe_info">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>120</y>
+      <width>281</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(70, 10, 10)</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="snack_title">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>200</y>
+      <width>281</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(230, 110, 110)</string>
+    </property>
+    <property name="text">
+     <string>Scan Your Items</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="snack_info">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>250</y>
+      <width>281</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(70, 10, 10)</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="done_title">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>320</y>
+      <width>281</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(230, 110, 110)</string>
+    </property>
+    <property name="text">
+     <string>Done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="done_info">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>370</y>
+      <width>281</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(70, 10, 10)</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="main_title">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>3</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(230, 110, 110)</string>
+    </property>
+    <property name="text">
+     <string>Lunchtime Heroes</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="main_info">
+    <property name="geometry">
+     <rect>
+      <x>631</x>
+      <y>50</y>
+      <width>341</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(230, 110, 110)</string>
+    </property>
+    <property name="text">
+     <string>The most advanced artificial intelligence canteen tool</string>
     </property>
    </widget>
   </widget>
@@ -110,13 +223,17 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>971</width>
+     <width>1601</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>startButton</tabstop>
+  <tabstop>startDetectionButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

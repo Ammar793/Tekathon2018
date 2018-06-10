@@ -4,12 +4,12 @@ import numpy as np
 def check_if_item_present(file):
     final_answer = False
 
-    imag = './train/train/' + file
+    #imag = file
 
-    img = cv2.imread(imag)
+    img = file
 
-    img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img1 = cv2.cvtColor(file, cv2.COLOR_BGR2GRAY)
+    img2 = cv2.cvtColor(file, cv2.COLOR_BGR2HSV)
 
     # print(img2)
     h, w = img1.shape
@@ -89,8 +89,8 @@ def check_if_item_present(file):
             do_left = False
             final_answer = True
 
-        if ( c2 > 20):
-            de_left = False
+        if ( c2 > 10):
+            do_left = False
         # print("done")
 
         c2 += 1

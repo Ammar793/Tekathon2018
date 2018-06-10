@@ -14,6 +14,12 @@ import segmentation
 
 snack_image = np.zeros(5)
 snack_found = False
+snack_name = "none"
+
+
+def set_snack_name(name):
+    global snack_name
+    snack_name = name
 
 def set_snack_found(boolean):
     global snack_found
@@ -91,6 +97,7 @@ def snack_detection_worker():
                 test(model,  image)
             else:
                 print("nothing present")
+                set_snack_name("please show the snack!")
 
 
 # read images from folder
@@ -123,6 +130,15 @@ def test(model,  image):
     prob = model.predict(img)
 
     print (prob)
+    if(prob[0][0] > 0.8):
+        set_snack_name("chips")
+        set_snack_found(True)
+    elif(prob[0][1] > 0.8):
+        set_snack_name("drink")
+        set_snack_found(True)
+    else:
+        set_snack_found(False)
+
 
 
 

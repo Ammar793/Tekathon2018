@@ -32,7 +32,7 @@ def ocr_worker():
         print (image_to_text)
         if(image_to_text != 0):
             text = pytesseract.image_to_string(image_to_text)
-            print("text")
+            print(text)
             text = text.replace('\n', ' ').replace('\r', '')
             text = re.sub(' +', ' ', text)
             text = check_if_two_names(text)

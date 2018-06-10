@@ -23,8 +23,8 @@ from tflearn.metrics import Accuracy
 ### Import picture files 
 ###################################
 
-file_name = './hakathon/all.csv'
-folder_with_images = "./hakathon/all_images/"
+file_name = 'C:/Users/mammar/Desktop/images/all.csv'
+folder_with_images = "C:/Users/mammar/Desktop/images/canteen_images/all/"
 row_count=0
 with open(file_name , 'r') as csvfile:
 	spamreader = csv.reader(csvfile)
@@ -173,7 +173,7 @@ tf.summary.FileWriter
 					 
 
 # Wrap the network in a model object
-model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_9.tflearn', max_checkpoints = 3,
+model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_canteen.tflearn', max_checkpoints = 3,
                     tensorboard_verbose = 3, tensorboard_dir='tmp/tflearn_logs/')
 
 ###################################
@@ -184,7 +184,7 @@ X = X.astype('float32')
 Y = Y.astype('float32')
 X_test = X_test.astype('float32')
 Y_test = Y_test.astype('float32')
-model.fit(X, Y, validation_set=(X_test, Y_test), batch_size=500,
-      n_epoch=100, run_id='model_chips_drinks_6', show_metric=True)
+model.fit(X, Y, validation_set=(X_test, Y_test), batch_size=200,
+      n_epoch=40, run_id='model_chips_drinks_6', show_metric=True)
 
-model.save('model_chips_drinks_6_final.tflearn')
+model.save('model_chips_drinks_canteen.tflearn')

@@ -3,9 +3,9 @@ import cv2
 
 class crop_values:
     x_start = 250
-    x_end = 400
+    x_end = 450
     y_start = 100
-    y_end = 300
+    y_end = 200
 
 def pre_process_image(img, window_height, window_width):
 
@@ -44,8 +44,6 @@ def pre_process_image(img, window_height, window_width):
 
 
 def process_image_for_ocr(img):
-    # img_cropped = cv2.rectangle(img, (crop_x_start, crop_y_start), (crop_x_end, crop_y_end), (255,0,0), 1)
-
     gray = img[crop_values.y_start:crop_values.y_end, crop_values.x_start: crop_values.x_end]
 
     gray = cv2.cvtColor(gray, cv2.COLOR_RGB2GRAY)
@@ -53,4 +51,14 @@ def process_image_for_ocr(img):
     gray = cv2.threshold(gray, 100, 255,
                          cv2.THRESH_TOZERO)[1]
 
+    #cv2.imshow("gray", gray)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+
     return gray
+
+
+def make_rectangle(img):
+    img_cropped = cv2.rectangle(img, (crop_values.x_start, crop_values.y_start), (crop_values.x_end, crop_values.y_end),
+                                (255, 0, 0), 1)
+    return img_cropped

@@ -52,3 +52,6 @@ def check_if_two_names(text):
             successfully_found()
     return proper_name
 
+def stop_thread():
+    global employee_found
+    employee_found = True

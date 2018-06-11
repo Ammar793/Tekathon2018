@@ -15,7 +15,8 @@ import segmentation
 snack_image = np.zeros(5)
 snack_found = False
 snack_name = "none"
-
+stop_looking_for_snack = True
+model = None
 
 def set_snack_name(name):
     global snack_name
@@ -30,21 +31,12 @@ def set_snack_image(image_array):
     global snack_image
     snack_image = image_array
 
-
-def reset():
-    set_snack_found(False)
-    set_snack_image(np.zeros(5))
-
-
 def successfully_found():
     set_snack_found(True)
 
 
-def snack_detection_worker():
-    global snack_image
-
-
-    # image preprocessors for neural network input
+def load_model():
+    global model
     img_prep = ImagePreprocessing()
     img_prep.add_featurewise_zero_center()
     img_prep.add_featurewise_stdnorm()
@@ -82,12 +74,19 @@ def snack_detection_worker():
     network = regression(network, optimizer='adam', learning_rate=1e-3, loss='categorical_crossentropy')
 
     #TODO: change checkpoint path
-    model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_7.tflearn', max_checkpoints=3,
+    model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_canteen_cp.tflearn', max_checkpoints=3,
                         tensorboard_verbose=3, tensorboard_dir='tmp/tflearn_logs/')
 
-    model.load('training/model_chips_drinks_6_final.tflearn')
+    model.load('training/model_chips_drinks_canteen.tflearn')
 
-    while True:
+def snack_detection_worker():
+    global snack_image
+    global stop_looking_for_snack
+    global model
+
+    # image preprocessors for neural network input
+
+    while not stop_looking_for_snack:
         #print (image)
         image = cv2.resize(snack_image, (64, 64))
         if (image.all() != 0):
@@ -130,17 +129,52 @@ def test(model,  image):
     prob = model.predict(img)
 
     print (prob)
-    if(prob[0][0] > 0.8):
-        set_snack_name("chips")
-        set_snack_found(True)
-    elif(prob[0][1] > 0.8):
-        set_snack_name("drink")
-        set_snack_found(True)
+    if(prob[0][0] > 0.9):
+        if confirm(0):
+            set_snack_found(True)
+            set_snack_name("chips")
+    elif(prob[0][1] > 0.9):
+        if confirm(1):
+            set_snack_found(True)
+            set_snack_name("drink")
     else:
         set_snack_found(False)
 
 
+counter_chips = 0
+counter_can = 0
 
+def confirm(item):
+    global counter_can
+    global counter_chips
+
+    if item ==0:
+        counter_can = 0
+        counter_chips+=1
+        if counter_chips == 10:
+            return True
+    elif item==1:
+        counter_can+=1
+        counter_chips = 0
+        if counter_can == 10:
+            return True
+    return False
+
+def reset():
+    global counter_can
+    global counter_chips
+    global stop_looking_for_snack
+
+    counter_chips = 0
+    counter_can = 0
+    set_snack_found(False)
+    set_snack_image(np.zeros(5))
+    set_snack_name("none")
+    stop_looking_for_snack = True
+
+def stop_thread():
+    global stop_looking_for_snack
+    stop_looking_for_snack = True
 
 #imageSet, image_names = readImages()
 #test(image_names, imageSet)

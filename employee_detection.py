@@ -4,9 +4,10 @@ import difflib
 import re
 
 #contains code in relation to detecting employee
-text = "nothing"
+employee = "nothing"
 image_to_text = 0
-employee_names = data_storage.employee_names
+employees = data_storage.employees
+employee_names = data_storage.get_employee_names_list()
 employee_found = False
 
 def set_employee_found(boolean):
@@ -26,7 +27,7 @@ def successfully_found():
 
 def ocr_worker():
     global employee_found
-    global text
+    global employee
     global image_to_text
     while not employee_found:
         print (image_to_text)
@@ -35,7 +36,7 @@ def ocr_worker():
             print(text)
             text = text.replace('\n', ' ').replace('\r', '')
             text = re.sub(' +', ' ', text)
-            text = check_if_two_names(text)
+            employee = check_if_two_names(text)
             #print( )
 
 def check_if_two_names(text):
@@ -49,8 +50,10 @@ def check_if_two_names(text):
         matches = difflib.get_close_matches(proper_name, employee_names)
         if( len(matches) >0):
             proper_name = matches[0]
+            employee = [x for x in employees if x.name == proper_name][0]
             successfully_found()
-    return proper_name
+            return employee
+    return data_storage.Employee(proper_name)
 
 def stop_thread():
     global employee_found

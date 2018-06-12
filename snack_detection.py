@@ -8,19 +8,27 @@ from tflearn.layers.estimator import regression
 from tflearn.data_preprocessing import ImagePreprocessing
 from tflearn.data_augmentation import ImageAugmentation
 import segmentation
+import data_storage
 
 
 #contains code in relation to detecting snack
 
+snacks = data_storage.snacks
+
 snack_image = np.zeros(5)
 snack_found = False
-snack_name = "none"
+snack = data_storage.Snack("none",0)
 stop_looking_for_snack = True
 model = None
 
-def set_snack_name(name):
-    global snack_name
-    snack_name = name
+def set_snack(name):
+    global snack
+    snack = [x for x in snacks if x.get_name() == name]
+    if(len(snack)>0):
+        print(snack[0].get_name())
+        snack = snack[0]
+    else:
+        snack = data_storage.Snack(name, 0)
 
 def set_snack_found(boolean):
     global snack_found
@@ -70,7 +78,7 @@ def load_model():
     network = fully_connected(network, 1024, activation='relu')
     network = dropout(network, 0.8)
 
-    network = fully_connected(network, 2, activation='softmax')
+    network = fully_connected(network, 3, activation='softmax')
     network = regression(network, optimizer='adam', learning_rate=1e-3, loss='categorical_crossentropy')
 
     #TODO: change checkpoint path
@@ -96,7 +104,7 @@ def snack_detection_worker():
             test(model,  image)
         else:
             print("nothing present")
-            set_snack_name("please show the snack!")
+            set_snack("please show the snack!")
 
 
 # read images from folder
@@ -131,16 +139,19 @@ def test(model,  image):
     print (prob)
     if(prob[0][0] > 0.9):
         if confirm(0):
+            set_snack("chips")
             set_snack_found(True)
-            set_snack_name("chips")
+
     elif(prob[0][1] > 0.9):
         if confirm(1):
+            set_snack("drink")
             set_snack_found(True)
-            set_snack_name("drink")
+
     elif (prob[0][2] > 0.9):
         if confirm(2):
+            set_snack("chocolate")
             set_snack_found(True)
-            set_snack_name("chocolate")
+
     else:
         set_snack_found(False)
 
@@ -185,7 +196,7 @@ def reset():
     counter_chocolate = 0
     set_snack_found(False)
     set_snack_image(np.zeros(5))
-    set_snack_name("none")
+    set_snack("none")
     stop_looking_for_snack = True
 
 def stop_thread():

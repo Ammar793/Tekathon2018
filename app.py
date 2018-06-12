@@ -120,6 +120,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.employe_info.setVisible(False)
         self.snack_info.setVisible(False)
         self.done_info.setVisible(False)
+        self.price_info.setVisible(False)
 
 
 
@@ -179,6 +180,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.snack_info.setFont(avenir_font)
         self.done_info.setFont(avenir_font)
         self.main_info.setFont(avenir_font)
+        self.price_info.setFont(avenir_font)
 
     def reset(self):
         global stop_looking_for_employee
@@ -197,6 +199,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             self.move_element(self.done_title, -40)
             self.move_element(self.snack_info, -40)
             self.move_element(self.done_info, -40)
+            self.move_element(self.price_info, -40)
 
         stop_looking_for_employee = False
 
@@ -208,6 +211,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.employe_info.setVisible(False)
         self.snack_info.setVisible(False)
         self.done_info.setVisible(False)
+        self.price_info.setVisible(False)
 
 
     def start_clicked(self):
@@ -241,7 +245,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         global lobster_font_bold
         global lobster_font_small
 
-        self.employe_info.setText(employee_detection.text)
+        self.employe_info.setText(employee_detection.employee.name)
         self.welcome_text.setVisible(True)
         self.employe_info.setVisible(True)
 
@@ -249,6 +253,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.move_element(self.done_title, 40)
         self.move_element(self.snack_info, 40)
         self.move_element(self.done_info, 40)
+        self.move_element(self.price_info, 40)
 
         self.switchStep(self.card_title, self.snack_title)
 
@@ -267,10 +272,12 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
 
     def set_snack_text(self):
-        self.snack_info.setText("Your item is a: " + snack_detection.snack_name)
+        self.snack_info.setText("Your item is a: " + snack_detection.snack.get_name() )
+        self.price_info.setText("Total Today: $" + str(snack_detection.snack.get_price()) + "\n Total Balance: $" + str(employee_detection.employee.get_total()) )
         self.switchStep(self.snack_title, self.done_title)
         self.snack_info.setVisible(True)
         self.done_info.setVisible(True)
+        self.price_info.setVisible(True)
 
 
     def play_sound(self):
@@ -309,6 +316,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
 
         elif (snack_detection.snack_found and not snack_detection.stop_looking_for_snack):
+            employee_detection.employee.add_to_total(snack_detection.snack.get_price())
             self.set_snack_text()
             self.play_sound()
             snack_detection.stop_looking_for_snack = True

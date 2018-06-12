@@ -198,10 +198,10 @@ border-radius:10px</string>
    <widget class="QLabel" name="done_info">
     <property name="geometry">
      <rect>
-      <x>1090</x>
-      <y>480</y>
-      <width>431</width>
-      <height>41</height>
+      <x>1110</x>
+      <y>600</y>
+      <width>361</width>
+      <height>101</height>
      </rect>
     </property>
     <property name="font">
@@ -213,7 +213,10 @@ border-radius:10px</string>
      <string notr="true">color: rgb(70, 10, 10)</string>
     </property>
     <property name="text">
-     <string>An email will be sent at the end of the month</string>
+     <string>An email will be sent at the end of the month with payment instructions!</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="main_title">
@@ -316,6 +319,27 @@ border-radius:10px</string>
       <width>120</width>
       <height>80</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="price_info">
+    <property name="geometry">
+     <rect>
+      <x>1170</x>
+      <y>500</y>
+      <width>351</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(70, 10, 10)</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>

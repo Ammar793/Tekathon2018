@@ -1,5 +1,3 @@
-
-
 employee_names = ["Abdelshakour,Ashraf Abdelraouf Fathy",
 "Abou-Melhem,Wassim",
 "Adusumilli,Ramesh",

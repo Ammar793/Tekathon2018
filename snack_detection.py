@@ -74,10 +74,10 @@ def load_model():
     network = regression(network, optimizer='adam', learning_rate=1e-3, loss='categorical_crossentropy')
 
     #TODO: change checkpoint path
-    model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_canteen_cp.tflearn', max_checkpoints=3,
+    model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_chocs_canteen_cp.tflearn', max_checkpoints=3,
                         tensorboard_verbose=3, tensorboard_dir='tmp/tflearn_logs/')
 
-    model.load('training/model_chips_drinks_canteen.tflearn')
+    model.load('training/model_chips_drinks_chocs_canteen.tflearn')
 
 def snack_detection_worker():
     global snack_image
@@ -89,14 +89,14 @@ def snack_detection_worker():
     while not stop_looking_for_snack:
         #print (image)
         image = cv2.resize(snack_image, (64, 64))
-        if (image.all() != 0):
+        #if (image.all()):
 
-            if (segmentation.check_if_item_present(image)):
-                print ("detecting snacks")
-                test(model,  image)
-            else:
-                print("nothing present")
-                set_snack_name("please show the snack!")
+        if (segmentation.check_if_item_present(image)):
+            print ("detecting snacks")
+            test(model,  image)
+        else:
+            print("nothing present")
+            set_snack_name("please show the snack!")
 
 
 # read images from folder
@@ -137,36 +137,52 @@ def test(model,  image):
         if confirm(1):
             set_snack_found(True)
             set_snack_name("drink")
+    elif (prob[0][2] > 0.9):
+        if confirm(2):
+            set_snack_found(True)
+            set_snack_name("chocolate")
     else:
         set_snack_found(False)
 
 
 counter_chips = 0
 counter_can = 0
+counter_chocolate = 0
 
 def confirm(item):
     global counter_can
     global counter_chips
+    global counter_chocolate
 
     if item ==0:
+        counter_chips += 1
         counter_can = 0
-        counter_chips+=1
+        counter_chocolate = 0
         if counter_chips == 10:
             return True
     elif item==1:
         counter_can+=1
         counter_chips = 0
+        counter_chocolate = 0
         if counter_can == 10:
+            return True
+    elif item==2:
+        counter_chocolate +=1
+        counter_chips = 0
+        counter_can = 0
+        if counter_chocolate == 10:
             return True
     return False
 
 def reset():
     global counter_can
     global counter_chips
+    global counter_chocolate
     global stop_looking_for_snack
 
     counter_chips = 0
     counter_can = 0
+    counter_chocolate = 0
     set_snack_found(False)
     set_snack_image(np.zeros(5))
     set_snack_name("none")

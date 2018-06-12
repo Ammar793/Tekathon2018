@@ -23,8 +23,8 @@ from tflearn.metrics import Accuracy
 ### Import picture files 
 ###################################
 
-file_name = 'C:/Users/mammar/Desktop/images/all.csv'
-folder_with_images = "C:/Users/mammar/Desktop/images/canteen_images/all/"
+file_name = 'C:/Users/mammar/PycharmProjects/Hackathon/training/images/all.csv'
+folder_with_images = "C:/Users/mammar/PycharmProjects/Hackathon/training/images/all/"
 row_count=0
 with open(file_name , 'r') as csvfile:
 	spamreader = csv.reader(csvfile)
@@ -40,7 +40,7 @@ def readImages(n_files, size_image):
 	#read csv file to get labels for image	
 	
 	print("starting reading images")
-	images = [[] for x in range (2)]
+	images = [[] for x in range (3)]
 	
 	first = True
 
@@ -51,8 +51,9 @@ def readImages(n_files, size_image):
 				first = False
 				continue
 			if(os.path.isfile(folder_with_images + row[0]) ):
+				#print(row[0])
 				img = cv2.imread (folder_with_images + row[0])
-				new_img = imresize(img, (size_image, size_image, 3))				
+				new_img = imresize(img, (size_image, size_image, 3))
 				images[int(row[1])].append (new_img)
 	#print (images)
 	#time.sleep(100)
@@ -64,11 +65,13 @@ def readImages(n_files, size_image):
 imageSet = readImages(n_files, size_image)
 chips= imageSet[0]
 drinks = imageSet[1]
+chocs = imageSet[2]
 
 allX = chips.copy()
 allX.extend(drinks)
+allX.extend(chocs)
 
-ally = [0] * len(chips) + [1] *len(drinks)
+ally = [0] * len(chips) + [1] *len(drinks) + [2] *len(chocs)
 
 allX = np.array(allX,dtype=np.uint8)
 ally = np.array(ally,dtype=np.uint8)
@@ -85,8 +88,8 @@ print(allX[0])
 X, X_test, Y, Y_test = train_test_split(allX, ally, test_size=0.1, random_state=42)
 
 # encode the Ys
-Y = to_categorical(Y, 2)
-Y_test = to_categorical(Y_test, 2)
+Y = to_categorical(Y, 3)
+Y_test = to_categorical(Y_test, 3)
 
 
 ###################################
@@ -165,7 +168,7 @@ network = max_pool_2d(network, 5)
 network = fully_connected(network, 1024, activation='relu')
 network = dropout(network, 0.8)
 
-network = fully_connected(network, 2, activation='softmax')
+network = fully_connected(network, 3, activation='softmax')
 network = regression(network, optimizer='adam', learning_rate=1e-3, loss='categorical_crossentropy')
 
 #--------
@@ -173,7 +176,7 @@ tf.summary.FileWriter
 					 
 
 # Wrap the network in a model object
-model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_canteen.tflearn', max_checkpoints = 3,
+model = tflearn.DNN(network, checkpoint_path='model_chips_drinks_chocs_canteen.tflearn', max_checkpoints = 3,
                     tensorboard_verbose = 3, tensorboard_dir='tmp/tflearn_logs/')
 
 ###################################
@@ -184,7 +187,7 @@ X = X.astype('float32')
 Y = Y.astype('float32')
 X_test = X_test.astype('float32')
 Y_test = Y_test.astype('float32')
-model.fit(X, Y, validation_set=(X_test, Y_test), batch_size=200,
+model.fit(X, Y, validation_set=(X_test, Y_test), batch_size=400,
       n_epoch=40, run_id='model_chips_drinks_6', show_metric=True)
 
-model.save('model_chips_drinks_canteen.tflearn')
+model.save('model_chips_drinks_chocs_canteen.tflearn')

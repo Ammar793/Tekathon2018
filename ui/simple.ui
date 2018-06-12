@@ -42,7 +42,7 @@
      <string notr="true"/>
     </property>
     <property name="title">
-     <string>Video</string>
+     <string/>
     </property>
     <widget class="QWidget" name="ImgWidget" native="true">
      <property name="enabled">

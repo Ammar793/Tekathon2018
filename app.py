@@ -8,6 +8,9 @@ import snack_detection
 import employee_detection
 import image_processing
 import math
+import winsound
+
+
 
 running = False
 capture_thread = None
@@ -16,6 +19,7 @@ q = Queue()
 stop_looking_for_employee = False
 employee_text= "none"
 snack_text= "none"
+counter = 0
 
 #main app
 
@@ -269,11 +273,18 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.done_info.setVisible(True)
 
 
+    def play_sound(self):
+        winsound.PlaySound('./resources/sound/beep.wav', winsound.SND_FILENAME)
+
     def detect_from_image(self, img):
+        global counter
         global stop_looking_for_employee
         img = image_processing.pre_process_image(img, self.window_height, self.window_width)
 
         snack_imag = image_processing.process_image_for_snack_detection(img)
+        filename = "choc_" + str(counter)+".jpg"
+        counter = counter + 1
+        cv2.imwrite("C:/Users/mammar/PycharmProjects/Hackathon/training/images/chocs/"+filename , snack_imag)
         snack_detection.set_snack_image(snack_imag)
 
         gray = image_processing.process_image_for_ocr(img)
@@ -293,11 +304,13 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             snack_detection.stop_looking_for_snack = False
             start_thread_from_target(snack_detection.snack_detection_worker)
             #employee_detection.set_employee_found(False)
+            self.play_sound()
             stop_looking_for_employee = True
 
 
         elif (snack_detection.snack_found and not snack_detection.stop_looking_for_snack):
             self.set_snack_text()
+            self.play_sound()
             snack_detection.stop_looking_for_snack = True
             #stop_thread(snack_detection_thread)
             #snack_detection.set_snack_found(False)

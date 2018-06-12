@@ -100,6 +100,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
         self.startDetectionButton.clicked.connect(self.start_detection_clicked)
         self.reset_button.clicked.connect(self.reset)
+        self.done_button.clicked.connect(self.reset)
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
@@ -120,7 +121,11 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.employe_info.setVisible(False)
         self.snack_info.setVisible(False)
         self.done_info.setVisible(False)
-        self.price_info.setVisible(False)
+        self.today_title.setVisible(False)
+        self.total_title.setVisible(False)
+        self.today_info.setVisible(False)
+        self.total_info.setVisible(False)
+        self.done_button.setVisible(False)
 
 
 
@@ -175,12 +180,15 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.done_title.setFont(lobster_font_small)
         self.main_title.setFont(lobster_font)
         self.welcome_text.setFont(lobster_font_small)
+        self.today_title.setFont(lobster_font_small)
+        self.total_title.setFont(lobster_font_small)
 
         self.employe_info.setFont(avenir_font)
         self.snack_info.setFont(avenir_font)
         self.done_info.setFont(avenir_font)
         self.main_info.setFont(avenir_font)
-        self.price_info.setFont(avenir_font)
+        self.today_info.setFont(avenir_font)
+        self.total_info.setFont(avenir_font)
 
     def reset(self):
         global stop_looking_for_employee
@@ -199,7 +207,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             self.move_element(self.done_title, -40)
             self.move_element(self.snack_info, -40)
             self.move_element(self.done_info, -40)
-            self.move_element(self.price_info, -40)
+            #self.move_element(self.price_info, -40)
 
         stop_looking_for_employee = False
 
@@ -211,7 +219,11 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.employe_info.setVisible(False)
         self.snack_info.setVisible(False)
         self.done_info.setVisible(False)
-        self.price_info.setVisible(False)
+        self.today_title.setVisible(False)
+        self.total_title.setVisible(False)
+        self.today_info.setVisible(False)
+        self.total_info.setVisible(False)
+        self.done_button.setVisible(False)
 
 
     def start_clicked(self):
@@ -253,7 +265,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.move_element(self.done_title, 40)
         self.move_element(self.snack_info, 40)
         self.move_element(self.done_info, 40)
-        self.move_element(self.price_info, 40)
+       # self.move_element(self.price_info, 40)
 
         self.switchStep(self.card_title, self.snack_title)
 
@@ -273,11 +285,17 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
     def set_snack_text(self):
         self.snack_info.setText("Your item is a: " + snack_detection.snack.get_name() )
-        self.price_info.setText("Total Today: $" + str(snack_detection.snack.get_price()) + "\n Total Balance: $" + str(employee_detection.employee.get_total()) )
+        self.today_info.setText("$" + str(snack_detection.snack.get_price()))
+        self.total_info.setText("$" + str(employee_detection.employee.get_total()) )
+
         self.switchStep(self.snack_title, self.done_title)
         self.snack_info.setVisible(True)
         self.done_info.setVisible(True)
-        self.price_info.setVisible(True)
+        self.today_title.setVisible(True)
+        self.total_title.setVisible(True)
+        self.today_info.setVisible(True)
+        self.total_info.setVisible(True)
+        self.done_button.setVisible(True)
 
 
     def play_sound(self):

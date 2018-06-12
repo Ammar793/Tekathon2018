@@ -137,17 +137,17 @@ def test(model,  image):
     prob = model.predict(img)
 
     print (prob)
-    if(prob[0][0] > 0.9):
+    if(prob[0][0] > 0.95):
         if confirm(0):
             set_snack("chips")
             set_snack_found(True)
 
-    elif(prob[0][1] > 0.9):
+    elif(prob[0][1] > 0.95):
         if confirm(1):
             set_snack("drink")
             set_snack_found(True)
 
-    elif (prob[0][2] > 0.9):
+    elif (prob[0][2] > 0.95):
         if confirm(2):
             set_snack("chocolate")
             set_snack_found(True)

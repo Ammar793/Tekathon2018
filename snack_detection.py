@@ -9,6 +9,7 @@ from tflearn.data_preprocessing import ImagePreprocessing
 from tflearn.data_augmentation import ImageAugmentation
 import segmentation
 import data_storage
+import threading
 
 
 #contains code in relation to detecting snack
@@ -87,24 +88,40 @@ def load_model():
 
     model.load('training/model_chips_drinks_chocs_canteen.tflearn')
 
-def snack_detection_worker():
-    global snack_image
-    global stop_looking_for_snack
-    global model
 
-    # image preprocessors for neural network input
 
-    while not stop_looking_for_snack:
-        #print (image)
-        image = cv2.resize(snack_image, (64, 64))
-        #if (image.all()):
+class snack_detection_thread(threading.Thread):
 
-        if (segmentation.check_if_item_present(image)):
-            print ("detecting snacks")
-            test(model,  image)
-        else:
-            print("nothing present")
-            set_snack("please show the snack!")
+    def __init__(self):
+        self._stopevent = threading.Event()
+        self._sleepperiod = 0.2
+        threading.Thread.__init__(self)
+
+
+    def run(self):
+        global snack_image
+        global stop_looking_for_snack
+        global model
+
+        # image preprocessors for neural network input
+
+        while not self._stopevent.isSet( ):
+            #print (image)
+            image = cv2.resize(snack_image, (64, 64))
+            #if (image.all()):
+
+            if (segmentation.check_if_item_present(image)):
+                print ("detecting snacks")
+                test(model,  image)
+            else:
+                print("nothing present")
+                set_snack("please show the snack!")
+            self._stopevent.wait(self._sleepperiod)
+
+    def join(self, timeout=None):
+        """ Stop the thread and wait for it to end. """
+        self._stopevent.set()
+        threading.Thread.join(self, timeout)
 
 
 # read images from folder

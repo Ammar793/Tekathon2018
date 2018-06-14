@@ -1,5 +1,5 @@
 import cv2
-
+import segmentation
 
 class crop_values:
     x_start = 330
@@ -7,11 +7,17 @@ class crop_values:
     y_start = 30
     y_end = 510
 
+class crop_values_card:
+    x_start = 370
+    x_end = 560
+    y_start = 150
+    y_end = 400
+
 class crop_values_name:
-    x_start = 330
-    x_end = 650
-    y_start = 420
-    y_end = 510
+    x_start = 370
+    x_end = 560
+    y_start = 320
+    y_end = 400
 
 def pre_process_image(img, window_height, window_width):
 
@@ -49,6 +55,15 @@ def pre_process_image(img, window_height, window_width):
     return img
 
 
+def process_image_for_presence_check(img, crop_settings):
+    gray = img[crop_settings.y_start:crop_settings.y_end, crop_settings.x_start: crop_settings.x_end]
+
+    #cv2.imshow("gray", gray)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+
+    return gray
+
 def process_image_for_ocr(img):
     gray = img[crop_values_name.y_start:crop_values_name.y_end, crop_values_name.x_start: crop_values_name.x_end]
 
@@ -72,7 +87,8 @@ def process_image_for_snack_detection(img):
     #cv2.destroyAllWindows()
     return imag
 
-def make_rectangle(img):
-    img_cropped = cv2.rectangle(img, (crop_values.x_start, crop_values.y_start), (crop_values.x_end, crop_values.y_end),
+
+def make_rectangle(img, crop_settings):
+    img_cropped = cv2.rectangle(img, (crop_settings.x_start, crop_settings.y_start), (crop_settings.x_end, crop_settings.y_end),
                                 (255, 0, 0), 1)
     return img_cropped

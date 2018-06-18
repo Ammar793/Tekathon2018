@@ -1,14 +1,11 @@
 from __future__ import division, print_function, absolute_import
 
-from skimage import color, io
 from scipy.misc import imresize
 import numpy as np
 from sklearn.cross_validation import train_test_split
 import os
 import csv
-from glob import glob
 import cv2
-import time
 import tensorflow as tf
 import tflearn
 from tflearn.data_utils import shuffle, to_categorical
@@ -31,17 +28,14 @@ with open(file_name , 'r') as csvfile:
 	row_count = sum(1 for row in spamreader)
 	
 print(row_count)
-
 n_files = row_count-1
-
 size_image = 64
 
 def readImages(n_files, size_image):
-	#read csv file to get labels for image	
-	
+
+	#read csv file to get labels for image
 	print("starting reading images")
 	images = [[] for x in range (3)]
-	
 	first = True
 
 	with open(file_name, 'r') as csvfile:
@@ -141,11 +135,6 @@ network = input_data(shape=[None, 64, 64, 3],
 
 # Configure how the network will be trained
 #acc = Accuracy(name="Accuracy")
-
-
-
-
-
 
 
 #--------

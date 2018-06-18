@@ -22,6 +22,12 @@
   <property name="styleSheet">
    <string notr="true">background-color: rgb(245, 220, 180)</string>
   </property>
+  <property name="iconSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
@@ -360,7 +366,7 @@ border-radius:10px</string>
      <string notr="true">color: rgb(230, 110, 110)</string>
     </property>
     <property name="text">
-     <string>Today</string>
+     <string>Current Total</string>
     </property>
    </widget>
    <widget class="QLabel" name="total_info">
@@ -387,7 +393,7 @@ border-radius:10px</string>
    <widget class="QPushButton" name="done_button">
     <property name="geometry">
      <rect>
-      <x>1190</x>
+      <x>1330</x>
       <y>820</y>
       <width>211</width>
       <height>31</height>
@@ -407,7 +413,7 @@ background-color: rgb(255,255,255);
 border-radius:8px;</string>
     </property>
     <property name="text">
-     <string>continue</string>
+     <string>DONE</string>
     </property>
    </widget>
    <widget class="QLabel" name="snack_subtitle">
@@ -440,6 +446,12 @@ border-radius:8px;</string>
       <height>31</height>
      </rect>
     </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255,255,255);</string>
+    </property>
     <property name="editable">
      <bool>true</bool>
     </property>
@@ -466,6 +478,32 @@ border-radius:8px;</string>
     </property>
     <property name="text">
      <string>Sorry! We can't recognize you</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="add_button">
+    <property name="geometry">
+     <rect>
+      <x>1070</x>
+      <y>820</y>
+      <width>211</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-style: solid;
+border-width: 2px;
+border-color: rgb(255,255,255);
+color: rgb(230, 110, 110);
+background-color: rgb(255,255,255);
+border-radius:8px;</string>
+    </property>
+    <property name="text">
+     <string>Add Another Item</string>
     </property>
    </widget>
   </widget>

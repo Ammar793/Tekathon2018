@@ -15,12 +15,15 @@ import threading
 #contains code in relation to detecting snack
 
 snacks = data_storage.snacks
-
 snack_image = np.zeros(5)
 snack_found = False
 snack = data_storage.Snack("none",0)
 stop_looking_for_snack = True
 model = None
+counter_chips = 0
+counter_can = 0
+counter_chocolate = 0
+
 
 def set_snack(name):
     global snack
@@ -31,6 +34,7 @@ def set_snack(name):
     else:
         snack = data_storage.Snack(name, 0)
 
+
 def set_snack_found(boolean):
     global snack_found
     snack_found = boolean
@@ -39,6 +43,7 @@ def set_snack_found(boolean):
 def set_snack_image(image_array):
     global snack_image
     snack_image = image_array
+
 
 def successfully_found():
     set_snack_found(True)
@@ -89,7 +94,6 @@ def load_model():
     model.load('training/model_chips_drinks_chocs_canteen.tflearn')
 
 
-
 class snack_detection_thread(threading.Thread):
 
     def __init__(self):
@@ -97,12 +101,9 @@ class snack_detection_thread(threading.Thread):
         self._sleepperiod = 0.2
         threading.Thread.__init__(self)
 
-
     def run(self):
         global snack_image
-        global stop_looking_for_snack
         global model
-
         # image preprocessors for neural network input
 
         while not self._stopevent.isSet( ):
@@ -110,12 +111,9 @@ class snack_detection_thread(threading.Thread):
             image = cv2.resize(snack_image, (64, 64))
             #if (image.all()):
 
-            if (segmentation.check_if_item_present(image)):
-                print ("detecting snacks")
-                test(model,  image)
-            else:
-                print("nothing present")
-                set_snack("please show the snack!")
+            print ("detecting snacks")
+            test(model,  image)
+
             self._stopevent.wait(self._sleepperiod)
 
     def join(self, timeout=None):
@@ -124,58 +122,47 @@ class snack_detection_thread(threading.Thread):
         threading.Thread.join(self, timeout)
 
 
-# read images from folder
-def readImage():
-    # read csv file to get labels for image
-    print("starting reading images")
-    images = []
-    names = []
-    first = True
-
-    folder = "C:/Users/Ammar Raufi/Desktop/winter 17/computer_vision/final_proj/test/X_Test/"
-
-    files = os.listdir(folder)
-
-    for i in range(0, len(files)):
-        img = cv2.imread(folder + '/' + files[i])
-        img = cv2.resize(img, (64, 64))
-        images.append(img)
-        names.append(files[i])
-
-    print("finished reading images")
-    return images, names
-
-
 # tests neural network
 def test(model,  image):
-
+    global counter_can
+    global counter_chips
+    global counter_chocolate
     img = np.reshape(image, (1, 64, 64, 3))
     img = img.astype('float32')
     prob = model.predict(img)
 
     print (prob)
-    if(prob[0][0] > 0.95):
+    if prob[0][0] > 0.9:
         if confirm(0):
             set_snack("chips")
             set_snack_found(True)
+            reset_counters()
 
-    elif(prob[0][1] > 0.95):
+    elif prob[0][1] > 0.9:
         if confirm(1):
             set_snack("drink")
             set_snack_found(True)
+            reset_counters()
 
-    elif (prob[0][2] > 0.95):
+    elif prob[0][2] > 0.9:
         if confirm(2):
             set_snack("chocolate")
             set_snack_found(True)
+            reset_counters()
 
     else:
         set_snack_found(False)
 
 
-counter_chips = 0
-counter_can = 0
-counter_chocolate = 0
+def reset_counters():
+    global counter_can
+    global counter_chips
+    global counter_chocolate
+
+    counter_chips = 0
+    counter_can = 0
+    counter_chocolate = 0
+
 
 def confirm(item):
     global counter_can
@@ -202,6 +189,7 @@ def confirm(item):
             return True
     return False
 
+
 def reset():
     global counter_can
     global counter_chips
@@ -215,6 +203,7 @@ def reset():
     set_snack_image(np.zeros(5))
     set_snack("none")
     stop_looking_for_snack = True
+
 
 def stop_thread():
     global stop_looking_for_snack

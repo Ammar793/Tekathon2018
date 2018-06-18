@@ -7,10 +7,8 @@ from PIL import Image
 import snack_detection
 import employee_detection
 import image_processing
-import winsound
 import data_storage
-import time
-
+import sound_effects
 
 running = False
 capture_thread = None
@@ -22,31 +20,13 @@ snack_text= "none"
 counter = 0
 is_item_present = False
 big_square = False
+today_total = 0
 
 employee_detection_thread = None
 snack_detection_thread = None
-#def start_thread_from_target(thread_target):
-#    thread = threading.Thread(target=thread_target)
-#    thread.start()
 
 def start_thread(thread):
     thread.start()
-
-
-def stop_thread(thread):
-    thread.stop_thread()
-
-
-class CircleWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None):
-        super(CircleWidget, self).__init__(parent)
-
-    def paintEvent(self, event):
-        painter = QtGui.QPainter()
-        painter.begin(self)
-        painter.setPen(QtGui.QPen(QtGui.QColor(230, 110, 110)))
-        painter.drawArc(QtCore.QRectF(5, 100, 35, 35), 0, 5760)
-        painter.end()
 
 
 # QT widget for showing image
@@ -97,18 +77,14 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.set_fonts()
 
         self.startButton.clicked.connect(self.start_clicked)
-
         self.startDetectionButton.clicked.connect(self.start_detection_clicked)
         self.reset_button.clicked.connect(self.reset)
         self.done_button.clicked.connect(self.reset)
+        self.add_button.clicked.connect(self.add_item)
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
         self.ImgWidget = OwnImageWidget(self.ImgWidget)
-        #self.circle_widget = CircleWidget(self.circle_widget)
-        #self.circle_widget.show()
-        #self.circle_widget.show()
-        #self.startButton.clicked.connect(self.overlay.show)
 
         pic = QtWidgets.QLabel(self)
         pic.setPixmap(QtGui.QPixmap("resources/icons/eye2.png"))
@@ -117,6 +93,10 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
 
+        self.setup_dropdown()
+        self.hide_elements_initial()
+
+    def hide_elements_initial(self):
         self.welcome_text.setVisible(False)
         self.employe_info.setVisible(False)
         self.snack_info.setVisible(False)
@@ -129,7 +109,9 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.snack_subtitle.setVisible(False)
         self.name_list.setVisible(False)
         self.sorry_text.setVisible(False)
+        self.add_button.setVisible(False)
 
+    def setup_dropdown(self):
         emp_names = data_storage.get_employee_names_list()
         self.name_list.addItem("")
         for name in emp_names:
@@ -141,15 +123,18 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         global loading_counter
         global loading_showing
         global show_loading
-        if show_loading and not loading_showing and loading_counter == 200:
+
+        interval_length = 200
+
+        if show_loading and not loading_showing and loading_counter == interval_length:
             img.show()
             loading_showing= True
             loading_counter = 0
-        elif show_loading and loading_showing and loading_counter == 200:
+        elif show_loading and loading_showing and loading_counter == interval_length:
             img.hide()
             loading_showing= False
             loading_counter = 0
-        loading_counter = (loading_counter + 1) % 201
+        loading_counter = (loading_counter + 1) % interval_length+1
 
     def show_loading(self):
         global pic
@@ -204,8 +189,10 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         global employee_detection_thread
         global snack_detection_thread
         global big_square
+        global today_total
         #ocr_thread = threading.Thread(target=employee_detection.ocr_worker)
 
+        today_total = 0
         employee_detection_thread.join()
 
         if big_square:
@@ -218,11 +205,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         start_thread(employee_detection_thread)
 
         if stop_looking_for_employee:
-            self.move_element(self.snack_title, -40)
-            self.move_element(self.done_title, -40)
-            self.move_element(self.snack_info, -40)
-            self.move_element(self.done_info, -40)
-            self.move_element(self.snack_subtitle, -40)
+            self.move_second_step_elements(-40)
             #self.move_element(self.price_info, -40)
 
         stop_looking_for_employee = False
@@ -230,19 +213,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.card_title.setFont(lobster_font_bold)
         self.snack_title.setFont(lobster_font_small)
         self.done_title.setFont(lobster_font_small)
-
-        self.welcome_text.setVisible(False)
-        self.employe_info.setVisible(False)
-        self.snack_info.setVisible(False)
-        self.done_info.setVisible(False)
-        self.today_title.setVisible(False)
-        self.total_title.setVisible(False)
-        self.today_info.setVisible(False)
-        self.total_info.setVisible(False)
-        self.done_button.setVisible(False)
-        self.snack_subtitle.setVisible(False)
-        self.name_list.setVisible(False)
-        self.sorry_text.setVisible(False)
+        self.hide_elements_initial()
 
         big_square = False
 
@@ -266,13 +237,19 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.startDetectionButton.setEnabled(False)
 
     def update_frame(self):
-        global imageToText
         self.show_loading()
         if not q.empty():
             self.startButton.setText('Camera is live')
             frame = q.get()
             img = frame["img"]
             self.detect_from_image(img)
+
+    def move_second_step_elements(self, value):
+        self.move_element(self.snack_title, value)
+        self.move_element(self.done_title, value)
+        self.move_element(self.snack_info, value)
+        self.move_element(self.done_info, value)
+        self.move_element(self.snack_subtitle, value)
 
     def set_employee_text(self, moved):
         global lobster_font
@@ -283,13 +260,8 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.welcome_text.setVisible(True)
         self.employe_info.setVisible(True)
         if not moved:
-            self.move_element(self.snack_title, 40)
-            self.move_element(self.done_title, 40)
-            self.move_element(self.snack_info, 40)
-            self.move_element(self.done_info, 40)
-            self.move_element(self.snack_subtitle, 40)
+            self.move_second_step_elements(40)
        # self.move_element(self.price_info, 40)
-
         self.switchStep(self.card_title, self.snack_title)
 
     def switchStep(self, currentStep, nexStep):
@@ -304,8 +276,12 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         element.setGeometry(px, py + move, dw, dh)
 
     def set_snack_text(self):
+        global today_total
+
+        today_total = today_total + snack_detection.snack.get_price()
+
         self.snack_info.setText(snack_detection.snack.get_name())
-        self.today_info.setText("$" + str(snack_detection.snack.get_price()))
+        self.today_info.setText("$" + str(today_total))
         self.total_info.setText("$" + str(employee_detection.employee.get_total()) )
 
         self.switchStep(self.snack_title, self.done_title)
@@ -317,15 +293,13 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.total_info.setVisible(True)
         self.done_button.setVisible(True)
         self.snack_subtitle.setVisible(True)
-
-    def play_sound(self):
-        winsound.PlaySound('./resources/sound/beep.wav', winsound.SND_FILENAME)
+        self.add_button.setVisible(True)
 
     def show_dropdown(self):
         line_edit = QtWidgets.QLineEdit()
         line_edit.setPlaceholderText("Please type your name then press Enter")
+        self.name_list.setCurrentIndex(0)
         self.name_list.setLineEdit(line_edit)
-        #self.name_list.setCurrentIndex(0)
 
         self.move_element(self.snack_title, 40)
         self.move_element(self.done_title, 40)
@@ -336,20 +310,44 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.sorry_text.setVisible(True)
         self.name_list.setVisible(True)
 
-    def name_selected(self,i):
+    def name_selected(self, i):
         global big_square
         global snack_detection_thread
+        global employee_detection_thread
+
+        if i == 0:
+            return
 
         big_square = True
-        employee_detection.set_employee(self.name_list.currentText())
+        employee_detection.set_employee_from_name(self.name_list.currentText())
         self.set_employee_text(True)
 
         self.name_list.setVisible(False)
         self.sorry_text.setVisible(False)
         snack_detection.stop_looking_for_snack = False
-        time.sleep(1)
 
+        employee_detection_thread.join()
         start_thread(snack_detection_thread)
+
+
+    def unset_snack_text(self):
+        self.snack_info.setText("")
+        self.today_info.setText("")
+        self.total_info.setText("")
+
+        self.switchStep(self.done_title, self.snack_title)
+        self.snack_info.setVisible(False)
+        self.done_info.setVisible(False)
+        self.today_title.setVisible(False)
+        self.total_title.setVisible(False)
+        self.today_info.setVisible(False)
+        self.total_info.setVisible(False)
+        self.done_button.setVisible(False)
+        self.add_button.setVisible(False)
+
+    def add_item(self):
+        snack_detection.stop_looking_for_snack = False
+        self.unset_snack_text()
 
     def detect_from_image(self, img):
         global counter
@@ -395,9 +393,9 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             big_square = True
 
             #employee_detection.set_employee_found(False)
-            self.play_sound()
+            sound_effects.play_sound()
             stop_looking_for_employee = True
-            time.sleep(1)
+
             employee_detection_thread.join()
             start_thread(snack_detection_thread)
 
@@ -405,7 +403,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         elif (snack_detection.snack_found and not snack_detection.stop_looking_for_snack):
             employee_detection.employee.add_to_total(snack_detection.snack.get_price())
             self.set_snack_text()
-            self.play_sound()
+            sound_effects.play_sound()
             snack_detection.stop_looking_for_snack = True
             #stop_thread(snack_detection_thread)
             #snack_detection.set_snack_found(False)

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 def check_if_item_present(file):
     final_answer = False
 
@@ -17,17 +18,23 @@ def check_if_item_present(file):
     for j in range(0, len(img1)):
         for k in range(0, len(img1[0])):
 
-            if (edges[j, k] == 255):
+            if edges[j, k] == 255:
                 ed += 1
 
     print (ed)
 
-    if(ed<50):
+    if ed<1200:
         final_answer = False
     else:
         final_answer = True
 
     return final_answer
+
+
+
+
+
+#def separate_foreground():
     # img2 = cv2.cvtColor(file, cv2.COLOR_BGR2HSV)
     #
     # # print(img2)
@@ -113,6 +120,4 @@ def check_if_item_present(file):
     #     # print("done")
     #
     #     c2 += 1
-
-    return final_answer
     #l = 5 * c2

@@ -4,26 +4,28 @@ import cv2
 import threading
 from queue import *
 from PIL import Image
-import snack_detection
-import employee_detection
-import image_processing
-import data_storage
-import sound_effects
+from visual_cortex import employee_detection, image_processing, snack_detection
+from memory import data_storage
+from ui import sound_effects
 
 running = False
 capture_thread = None
 form_class = uic.loadUiType("ui/simple.ui")[0]
 q = Queue()
 stop_looking_for_employee = False
-employee_text= "none"
-snack_text= "none"
-counter = 0
-is_item_present = False
 big_square = False
 today_total = 0
 
 employee_detection_thread = None
 snack_detection_thread = None
+loading_counter = 0
+loading_showing = False
+show_loading = False
+
+lobster_font = None
+lobster_font_bold = None
+lobster_font_small = None
+
 
 def start_thread(thread):
     thread.start()
@@ -49,16 +51,8 @@ class OwnImageWidget(QtWidgets.QWidget):
         qp.end()
 
 
-loading_counter = 0
-loading_showing = False
-show_loading = False
 # QT widget for main window
-
-
 class MyWindowClass(QtWidgets.QMainWindow, form_class):
-    lobster_font = None
-    lobster_font_bold = None
-    lobster_font_small = None
     pic = None
 
     def __init__(self, parent=None):
@@ -75,12 +69,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         # tell painter to use your font:
         self.setupUi(self)
         self.set_fonts()
-
-        self.startButton.clicked.connect(self.start_clicked)
-        self.startDetectionButton.clicked.connect(self.start_detection_clicked)
-        self.reset_button.clicked.connect(self.reset)
-        self.done_button.clicked.connect(self.reset)
-        self.add_button.clicked.connect(self.add_item)
+        self.setup_buttons()
 
         self.window_width = self.ImgWidget.frameSize().width()
         self.window_height = self.ImgWidget.frameSize().height()
@@ -95,6 +84,13 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
         self.setup_dropdown()
         self.hide_elements_initial()
+
+    def setup_buttons(self):
+        self.startButton.clicked.connect(self.start_clicked)
+        self.startDetectionButton.clicked.connect(self.start_detection_clicked)
+        self.reset_button.clicked.connect(self.reset)
+        self.done_button.clicked.connect(self.reset)
+        self.add_button.clicked.connect(self.add_item)
 
     def hide_elements_initial(self):
         self.welcome_text.setVisible(False)
@@ -138,7 +134,6 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
     def show_loading(self):
         global pic
-        global is_item_present
         if not stop_looking_for_employee and employee_detection.item_present:
             pic.move(1300, 250)
             self.toggle_loading(pic)
@@ -219,8 +214,6 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
     def start_clicked(self):
         global running
-        global employee_text
-        global snack_text
         running = True
         start_thread(capture_thread)
         self.startButton.setEnabled(False)
@@ -282,7 +275,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
         self.snack_info.setText(snack_detection.snack.get_name())
         self.today_info.setText("$" + str(today_total))
-        self.total_info.setText("$" + str(employee_detection.employee.get_total()) )
+        self.total_info.setText("$" + str(employee_detection.employee.get_total()))
 
         self.switchStep(self.snack_title, self.done_title)
         self.snack_info.setVisible(True)
@@ -350,9 +343,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.unset_snack_text()
 
     def detect_from_image(self, img):
-        global counter
         global stop_looking_for_employee
-        global is_item_present
         global big_square
 
         img = image_processing.pre_process_image(img, self.window_height, self.window_width)
@@ -363,9 +354,6 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
         img_init = image_processing.process_image_for_presence_check(img, crop_settings)
         snack_imag = image_processing.process_image_for_snack_detection(img)
-        filename = "choc_" + str(counter)+".jpg"
-        counter = counter + 1
-        #cv2.imwrite("C:/Users/mammar/PycharmProjects/Hackathon/training/images/chocs/"+filename , snack_imag)
         snack_detection.set_snack_image(snack_imag)
 
         gray = image_processing.process_image_for_ocr(img)
@@ -376,41 +364,31 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         employee_detection.set_image_to_text(Image.fromarray(gray))
         employee_detection.set_cv_image(img_init)
 
-
         image = QtGui.QImage(image_processing.make_rectangle(img, crop_settings).data, width, height, bpl, QtGui.QImage.Format_RGB888)
         self.ImgWidget.setImage(image)
 
         number_of_tries = employee_detection.try_counter
 
-        if (number_of_tries > 15 and not stop_looking_for_employee):
+        if number_of_tries > 15 and not stop_looking_for_employee:
             self.show_dropdown()
             stop_looking_for_employee = True
 
-        if (employee_detection.employee_found and not stop_looking_for_employee):
+        if employee_detection.employee_found and not stop_looking_for_employee:
             self.set_employee_text(False)
-            #stop_thread(ocr_thread)
             snack_detection.stop_looking_for_snack = False
             big_square = True
 
-            #employee_detection.set_employee_found(False)
             sound_effects.play_sound()
             stop_looking_for_employee = True
 
             employee_detection_thread.join()
             start_thread(snack_detection_thread)
 
-
-        elif (snack_detection.snack_found and not snack_detection.stop_looking_for_snack):
+        elif snack_detection.snack_found and not snack_detection.stop_looking_for_snack:
             employee_detection.employee.add_to_total(snack_detection.snack.get_price())
             self.set_snack_text()
             sound_effects.play_sound()
             snack_detection.stop_looking_for_snack = True
-            #stop_thread(snack_detection_thread)
-            #snack_detection.set_snack_found(False)
-            #self.startDetectionButton.setEnabled(True)
-
-        #else:
-        #    self.label_2.setText("nothing has been found!")
 
     def closeEvent(self, event):
         global running
@@ -434,11 +412,8 @@ def grab(cam, queue, width, height, fps):
         else:
             print(queue.qsize())
 
-#setting up threads
+
 capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
-#ocr_thread = threading.Thread(target= employee_detection.ocr_worker)
-#snack_detection_thread = threading.Thread(target= snack_detection.snack_detection_worker)
-#starting app
 app = QtWidgets.QApplication(sys.argv)
 w = MyWindowClass(None)
 w.setWindowTitle('Lean Clean Canteen')
